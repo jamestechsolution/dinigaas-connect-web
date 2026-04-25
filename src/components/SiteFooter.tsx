@@ -51,11 +51,11 @@ export function SiteFooter() {
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="mt-0.5 size-4 shrink-0" />
-                <span>+251 900 000 000</span>
+                <a href="tel:+251923014132" className="hover:text-primary-foreground">+251 923 014 132</a>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="mt-0.5 size-4 shrink-0" />
-                <span>info@dinigaas.et</span>
+                <a href="mailto:dinigaastrading@gmail.com" className="hover:text-primary-foreground">dinigaastrading@gmail.com</a>
               </li>
             </ul>
           </div>

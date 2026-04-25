@@ -1,18 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X, MapPin } from "lucide-react";
-
-const NAV = [
-  { to: "/", label: "Home" },
-  { to: "/about", label: "About" },
-  { to: "/services", label: "Services" },
-  { to: "/products", label: "Products" },
-  { to: "/news", label: "News" },
-  { to: "/careers", label: "Careers" },
-] as const;
+import { useNavItems } from "@/hooks/use-nav-items";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const nav = useNavItems();
 
   return (
     <>
@@ -38,13 +31,13 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-9 lg:flex">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
-                key={item.to}
-                to={item.to}
+                key={item.id}
+                to={item.path}
                 className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
                 activeProps={{ className: "text-primary" }}
-                activeOptions={{ exact: item.to === "/" }}
+                activeOptions={{ exact: item.path === "/" }}
               >
                 {item.label}
               </Link>
@@ -72,14 +65,14 @@ export function SiteHeader() {
         {open && (
           <div className="border-t border-border bg-background lg:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-              {NAV.map((item) => (
+              {nav.map((item) => (
                 <Link
-                  key={item.to}
-                  to={item.to}
+                  key={item.id}
+                  to={item.path}
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent"
                   activeProps={{ className: "bg-accent text-primary" }}
-                  activeOptions={{ exact: item.to === "/" }}
+                  activeOptions={{ exact: item.path === "/" }}
                 >
                   {item.label}
                 </Link>

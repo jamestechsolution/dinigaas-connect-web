@@ -108,7 +108,11 @@ function CareersPage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href={`mailto:careers@dinigaas.et?subject=${encodeURIComponent("Application: " + open.title)}`}
+                href={`mailto:dinigaastrading@gmail.com?subject=${encodeURIComponent(
+                  "Application: " + open.title,
+                )}&body=${encodeURIComponent(
+                  `Hello Dinigaas Trading S.C.,\n\nI'd like to apply for the ${open.title} role (${open.department}).\n\nMy background:\n\nThank you,\n`,
+                )}`}
                 className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-light"
               >
                 Apply via email

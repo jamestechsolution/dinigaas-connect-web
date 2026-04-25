@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, GraduationCap, Stethoscope, Sparkles, Users, ShieldCheck, BookOpen } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { useSiteContent } from "@/hooks/use-site-content";
+import { useSiteImages } from "@/hooks/use-site-images";
 import heroImg from "@/assets/hero-students.jpg";
 import healthImg from "@/assets/healthcare.jpg";
 import schoolImg from "@/assets/school-building.jpg";
@@ -24,6 +25,10 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { get } = useSiteContent("home");
+  const { get: getImg } = useSiteImages();
+  const heroSrc = getImg("home_hero", heroImg);
+  const storySrc = getImg("home_story", schoolImg);
+  const healthSrc = getImg("home_health", healthImg);
   return (
     <SiteLayout>
       {/* Hero */}
@@ -81,7 +86,7 @@ function HomePage() {
               <div className="absolute -inset-6 -rotate-3 rounded-[3rem] bg-cotton" aria-hidden />
               <div className="relative aspect-[4/5] overflow-hidden rounded-3xl ring-1 ring-black/5 sm:aspect-[16/11] lg:aspect-[4/5]">
                 <img
-                  src={heroImg}
+                  src={heroSrc}
                   alt="Students of Dinigaas Trading S.C. school in Sheger City"
                   width={1280}
                   height={1600}
@@ -161,7 +166,7 @@ function HomePage() {
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:px-12">
           <div className="relative">
             <img
-              src={schoolImg}
+              src={storySrc}
               alt="Dinigaas school building"
               loading="lazy"
               width={1200}
@@ -232,7 +237,7 @@ function HomePage() {
             </div>
           </div>
           <img
-            src={healthImg}
+            src={healthSrc}
             alt="Healthcare professional at the Dinigaas clinic"
             loading="lazy"
             width={1200}

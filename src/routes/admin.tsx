@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
+  ImageIcon, Navigation, Upload,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "content" | "products" | "news" | "careers" | "messages" | "subscribers";
+type Tab = "content" | "images" | "nav" | "products" | "news" | "careers" | "messages" | "subscribers";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -85,6 +86,8 @@ function AdminPage() {
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
                 ["content", FileText, "Site Content"],
+                ["images", ImageIcon, "Images"],
+                ["nav", Navigation, "Navigation"],
                 ["products", Package, "Products"],
                 ["news", Newspaper, "News"],
                 ["careers", Briefcase, "Careers"],
@@ -106,6 +109,8 @@ function AdminPage() {
             </nav>
             <div className="mt-8">
               {tab === "content" && <SiteContentAdmin />}
+              {tab === "images" && <SiteImagesAdmin />}
+              {tab === "nav" && <NavItemsAdmin />}
               {tab === "products" && <ProductsAdmin />}
               {tab === "news" && <NewsAdmin />}
               {tab === "careers" && <CareersAdmin />}
@@ -443,6 +448,217 @@ function SiteContentAdmin() {
           })}
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ------------ Site Images (media library) ------------ */
+type ImageRow = { id: string; slot: string; label: string; image_url: string | null };
+type MediaFile = { name: string; url: string };
+
+function SiteImagesAdmin() {
+  const [rows, setRows] = useState<ImageRow[]>([]);
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [picker, setPicker] = useState<ImageRow | null>(null);
+
+  const loadRows = async () => {
+    const { data } = await supabase.from("site_images").select("*").order("label");
+    setRows((data ?? []) as ImageRow[]);
+  };
+  const loadFiles = async () => {
+    const { data } = await supabase.storage.from("site_media").list("", { sortBy: { column: "created_at", order: "desc" } });
+    const list = (data ?? []).filter((f) => f.name && !f.name.startsWith("."));
+    const enriched = list.map((f) => ({
+      name: f.name,
+      url: supabase.storage.from("site_media").getPublicUrl(f.name).data.publicUrl,
+    }));
+    setFiles(enriched);
+  };
+  useEffect(() => { loadRows(); loadFiles(); }, []);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("site_media").upload(path, file, {
+      contentType: file.type, upsert: false,
+    });
+    setUploading(false);
+    e.target.value = "";
+    if (error) return toast.error(error.message);
+    toast.success("Uploaded");
+    loadFiles();
+  }
+
+  async function assign(row: ImageRow, url: string | null) {
+    const { error } = await supabase.from("site_images").update({ image_url: url }).eq("id", row.id);
+    if (error) return toast.error(error.message);
+    toast.success(`${row.label} updated`);
+    setPicker(null);
+    loadRows();
+  }
+
+  async function deleteFile(name: string) {
+    if (!confirm("Delete this image from the library? Slots using it will fall back to the default.")) return;
+    const { error } = await supabase.storage.from("site_media").remove([name]);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    loadFiles();
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-serif text-xl text-primary">Image slots</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Pick which uploaded image appears in each slot. Changes go live instantly.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {rows.map((r) => (
+            <Card key={r.id}>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{r.label}</p>
+              <div className="mt-2 aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+                {r.image_url ? (
+                  <img src={r.image_url} alt={r.label} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="grid h-full place-items-center text-xs text-muted-foreground">Using default image</div>
+                )}
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Btn onClick={() => setPicker(r)}><ImageIcon className="size-4"/>Change</Btn>
+                {r.image_url && (
+                  <button onClick={() => assign(r, null)} className="rounded-full border border-border px-4 py-2 text-sm hover:bg-accent">
+                    Reset to default
+                  </button>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-serif text-xl text-primary">Media library</h2>
+          <label className={`inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-light ${uploading ? "opacity-60" : ""}`}>
+            {uploading ? <Loader2 className="size-4 animate-spin"/> : <Upload className="size-4"/>}
+            {uploading ? "Uploading…" : "Upload image"}
+            <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading}/>
+          </label>
+        </div>
+        {files.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No images yet. Upload your first one.</p>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {files.map((f) => (
+              <div key={f.name} className="group relative overflow-hidden rounded-xl border border-border bg-background">
+                <img src={f.url} alt={f.name} className="aspect-square w-full object-cover"/>
+                <button onClick={() => deleteFile(f.name)} className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5 text-destructive opacity-0 shadow transition-opacity group-hover:opacity-100">
+                  <Trash2 className="size-3.5"/>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {picker && (
+        <Modal onClose={() => setPicker(null)} title={`Choose image: ${picker.label}`}>
+          {files.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Upload an image first using the button above.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {files.map((f) => (
+                <button key={f.name} onClick={() => assign(picker, f.url)} className="group overflow-hidden rounded-xl border border-border ring-primary transition-all hover:ring-2">
+                  <img src={f.url} alt={f.name} className="aspect-square w-full object-cover"/>
+                </button>
+              ))}
+            </div>
+          )}
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+/* ------------ Navigation ------------ */
+type NavRow = { id: string; label: string; path: string; sort_order: number; active: boolean };
+function NavItemsAdmin() {
+  const [items, setItems] = useState<NavRow[]>([]);
+  const [editing, setEditing] = useState<Partial<NavRow> | null>(null);
+
+  const load = () => supabase.from("nav_items").select("*").order("sort_order").then(({ data }) => setItems((data ?? []) as NavRow[]));
+  useEffect(() => { load(); }, []);
+
+  async function save() {
+    if (!editing?.label || !editing?.path) return toast.error("Label and path required");
+    if (!editing.path.startsWith("/")) return toast.error("Path must start with /");
+    const payload = {
+      label: editing.label.trim(),
+      path: editing.path.trim(),
+      sort_order: Number(editing.sort_order ?? 0),
+      active: editing.active ?? true,
+    };
+    const { error } = editing.id
+      ? await supabase.from("nav_items").update(payload).eq("id", editing.id)
+      : await supabase.from("nav_items").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success("Saved"); setEditing(null); load();
+  }
+  async function remove(id: string) {
+    if (!confirm("Remove this nav item?")) return;
+    const { error } = await supabase.from("nav_items").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Removed"); load();
+  }
+  async function toggleActive(item: NavRow) {
+    await supabase.from("nav_items").update({ active: !item.active }).eq("id", item.id);
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">Edit the labels and target routes shown in the site header.</p>
+        <Btn onClick={() => setEditing({ label: "", path: "/", sort_order: items.length + 1, active: true })}>
+          <Plus className="size-4"/>Add link
+        </Btn>
+      </div>
+      <div className="grid gap-2">
+        {items.map((it) => (
+          <Card key={it.id}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-serif text-lg text-primary">{it.label}</p>
+                <p className="text-xs text-muted-foreground">{it.path} · order {it.sort_order} · {it.active ? "Visible" : "Hidden"}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => toggleActive(it)} className="rounded-full border border-border px-3 py-1 text-xs hover:bg-accent">
+                  {it.active ? "Hide" : "Show"}
+                </button>
+                <button onClick={() => setEditing(it)} className="rounded-full p-2 hover:bg-accent"><Pencil className="size-4"/></button>
+                <button onClick={() => remove(it.id)} className="rounded-full p-2 text-destructive hover:bg-destructive/10"><Trash2 className="size-4"/></button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+      {editing && (
+        <Modal onClose={() => setEditing(null)} title={editing.id ? "Edit nav link" : "New nav link"}>
+          <div className="space-y-3">
+            <Input placeholder="Label (e.g. About)" value={editing.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })}/>
+            <Input placeholder="Path (e.g. /about)" value={editing.path ?? ""} onChange={(e) => setEditing({ ...editing, path: e.target.value })}/>
+            <Input type="number" placeholder="Sort order" value={editing.sort_order ?? 0} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })}/>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={editing.active ?? true} onChange={(e) => setEditing({ ...editing, active: e.target.checked })}/>
+              Visible in header
+            </label>
+            <Btn onClick={save}>Save</Btn>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

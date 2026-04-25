@@ -86,6 +86,36 @@ export type Database = {
         }
         Relationships: []
       }
+      nav_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          label: string
+          path: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label: string
+          path: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+          path?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           content: string
@@ -206,6 +236,30 @@ export type Database = {
           sort_order?: number
           updated_at?: string
           value?: string
+        }
+        Relationships: []
+      }
+      site_images: {
+        Row: {
+          id: string
+          image_url: string | null
+          label: string
+          slot: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          image_url?: string | null
+          label: string
+          slot: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          image_url?: string | null
+          label?: string
+          slot?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -89,7 +89,7 @@ function ContactPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-foreground">Phone</p>
-                  <p className="text-muted-foreground">+251 900 000 000</p>
+                  <a href="tel:+251923014132" className="text-muted-foreground hover:text-primary">+251 923 014 132</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -98,7 +98,7 @@ function ContactPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-foreground">Email</p>
-                  <p className="text-muted-foreground">info@dinigaas.et</p>
+                  <a href="mailto:dinigaastrading@gmail.com" className="text-muted-foreground hover:text-primary">dinigaastrading@gmail.com</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">

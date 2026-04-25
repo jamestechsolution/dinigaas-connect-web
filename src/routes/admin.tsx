@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X,
+  Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -11,14 +11,14 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "products" | "news" | "careers" | "messages" | "subscribers";
+type Tab = "content" | "products" | "news" | "careers" | "messages" | "subscribers";
 
 function AdminPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [tab, setTab] = useState<Tab>("products");
+  const [tab, setTab] = useState<Tab>("content");
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -84,6 +84,7 @@ function AdminPage() {
             <h1 className="font-serif text-3xl text-primary md:text-4xl">Dashboard</h1>
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
+                ["content", FileText, "Site Content"],
                 ["products", Package, "Products"],
                 ["news", Newspaper, "News"],
                 ["careers", Briefcase, "Careers"],
@@ -104,6 +105,7 @@ function AdminPage() {
               ))}
             </nav>
             <div className="mt-8">
+              {tab === "content" && <SiteContentAdmin />}
               {tab === "products" && <ProductsAdmin />}
               {tab === "news" && <NewsAdmin />}
               {tab === "careers" && <CareersAdmin />}

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, GraduationCap, Stethoscope, Sparkles, Users, ShieldCheck, BookOpen } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
+import { useSiteContent } from "@/hooks/use-site-content";
 import heroImg from "@/assets/hero-students.jpg";
 import healthImg from "@/assets/healthcare.jpg";
 import schoolImg from "@/assets/school-building.jpg";
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const { get } = useSiteContent("home");
   return (
     <SiteLayout>
       {/* Hero */}
@@ -32,29 +34,30 @@ function HomePage() {
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1">
                 <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                  Community Foundation
+                  {get("home_hero_eyebrow", "Community Foundation")}
                 </span>
               </div>
               <h1 className="text-balance font-serif text-5xl leading-[1.05] tracking-tight text-primary md:text-6xl lg:text-7xl">
-                Nurturing the <em className="italic text-clay">future</em> of Sheger City.
+                {get("home_hero_title", "Nurturing the future of Sheger City.")}
               </h1>
-              <p className="mt-7 max-w-[48ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-                From the first steps of KG1 through Grade 8, and from routine checkups to specialized
-                care — Dinigaas Trading S.C. delivers education and healthcare that transforms
-                families and strengthens our community.
+              <p className="mt-7 max-w-[48ch] text-pretty text-lg leading-relaxed text-muted-foreground whitespace-pre-line">
+                {get(
+                  "home_hero_subtitle",
+                  "From the first steps of KG1 through Grade 8, and from routine checkups to specialized care — Dinigaas Trading S.C. delivers education and healthcare that transforms families and strengthens our community."
+                )}
               </p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/services"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary-light"
                 >
-                  Our Services <ArrowRight className="size-4" />
+                  {get("home_cta_primary", "Our Services")} <ArrowRight className="size-4" />
                 </Link>
                 <Link
                   to="/contact"
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-accent"
                 >
-                  Contact us
+                  {get("home_cta_secondary", "Contact us")}
                 </Link>
               </div>
 

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
+  ImageIcon, Navigation, Upload,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "content" | "products" | "news" | "careers" | "messages" | "subscribers";
+type Tab = "content" | "images" | "nav" | "products" | "news" | "careers" | "messages" | "subscribers";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -85,6 +86,8 @@ function AdminPage() {
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
                 ["content", FileText, "Site Content"],
+                ["images", ImageIcon, "Images"],
+                ["nav", Navigation, "Navigation"],
                 ["products", Package, "Products"],
                 ["news", Newspaper, "News"],
                 ["careers", Briefcase, "Careers"],
@@ -106,6 +109,8 @@ function AdminPage() {
             </nav>
             <div className="mt-8">
               {tab === "content" && <SiteContentAdmin />}
+              {tab === "images" && <SiteImagesAdmin />}
+              {tab === "nav" && <NavItemsAdmin />}
               {tab === "products" && <ProductsAdmin />}
               {tab === "news" && <NewsAdmin />}
               {tab === "careers" && <CareersAdmin />}

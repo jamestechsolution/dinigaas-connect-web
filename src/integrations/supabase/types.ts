@@ -176,6 +176,39 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          id: string
+          key: string
+          label: string
+          multiline: boolean
+          section: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          label: string
+          multiline?: boolean
+          section?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          label?: string
+          multiline?: boolean
+          section?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

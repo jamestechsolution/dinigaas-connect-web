@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/SiteLayout";
+import { useSiteContent } from "@/hooks/use-site-content";
 import { Heart, Target, Eye, Users } from "lucide-react";
 import schoolImg from "@/assets/school-building.jpg";
 
@@ -16,18 +17,17 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const { get } = useSiteContent("about");
   return (
     <SiteLayout>
       <section className="bg-cotton py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary-light">About us</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary-light">{get("about_eyebrow", "About us")}</p>
           <h1 className="mt-3 max-w-3xl font-serif text-5xl text-primary md:text-6xl">
-            A locally rooted company serving Sheger City.
+            {get("about_title", "A locally rooted company serving Sheger City.")}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            Dinigaas Trading S.C. is a community-focused company headquartered in Gefarsa Gujje
-            Kella. We invest in education and healthcare because we believe these are the
-            foundations of every prosperous neighborhood.
+          <p className="mt-6 max-w-2xl text-lg text-muted-foreground whitespace-pre-line">
+            {get("about_intro", "")}
           </p>
         </div>
       </section>
@@ -37,14 +37,11 @@ function AboutPage() {
           <img src={schoolImg} alt="Dinigaas campus" loading="lazy" width={1200} height={900} className="rounded-3xl object-cover shadow-card" />
           <div>
             <h2 className="font-serif text-3xl text-primary md:text-4xl">Our story</h2>
-            <p className="mt-5 leading-relaxed text-muted-foreground">
-              Founded with a mission to uplift the families of Sheger City, Dinigaas began with a
-              single school and grew to include healthcare and trading operations. Today we serve
-              hundreds of students and patients every week.
+            <p className="mt-5 leading-relaxed text-muted-foreground whitespace-pre-line">
+              {get("about_story_p1", "")}
             </p>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              We are proud to employ qualified teachers, nurses and professionals from our local
-              community, ensuring our impact stays close to home.
+            <p className="mt-4 leading-relaxed text-muted-foreground whitespace-pre-line">
+              {get("about_story_p2", "")}
             </p>
           </div>
         </div>

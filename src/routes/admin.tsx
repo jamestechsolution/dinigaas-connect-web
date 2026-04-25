@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X,
+  Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -11,14 +11,14 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "products" | "news" | "careers" | "messages" | "subscribers";
+type Tab = "content" | "products" | "news" | "careers" | "messages" | "subscribers";
 
 function AdminPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [tab, setTab] = useState<Tab>("products");
+  const [tab, setTab] = useState<Tab>("content");
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -84,6 +84,7 @@ function AdminPage() {
             <h1 className="font-serif text-3xl text-primary md:text-4xl">Dashboard</h1>
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
+                ["content", FileText, "Site Content"],
                 ["products", Package, "Products"],
                 ["news", Newspaper, "News"],
                 ["careers", Briefcase, "Careers"],
@@ -104,6 +105,7 @@ function AdminPage() {
               ))}
             </nav>
             <div className="mt-8">
+              {tab === "content" && <SiteContentAdmin />}
               {tab === "products" && <ProductsAdmin />}
               {tab === "news" && <NewsAdmin />}
               {tab === "careers" && <CareersAdmin />}
@@ -380,6 +382,66 @@ function SubscribersAdmin() {
             <button onClick={() => remove(s.id)} className="rounded-full p-2 text-destructive hover:bg-destructive/10"><Trash2 className="size-4"/></button>
           </div>
         </Card>
+      ))}
+    </div>
+  );
+}
+
+/* ------------ Site Content (homepage + about copy) ------------ */
+type ContentRow = { id: string; key: string; value: string; label: string; section: string; multiline: boolean; sort_order: number };
+function SiteContentAdmin() {
+  const [rows, setRows] = useState<ContentRow[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase.from("site_content").select("*").order("section").order("sort_order");
+    const list = (data ?? []) as ContentRow[];
+    setRows(list);
+    setDrafts(Object.fromEntries(list.map((r) => [r.key, r.value])));
+  };
+  useEffect(() => { load(); }, []);
+
+  async function save(row: ContentRow) {
+    setSavingKey(row.key);
+    const { error } = await supabase.from("site_content").update({ value: drafts[row.key] ?? "" }).eq("id", row.id);
+    setSavingKey(null);
+    if (error) return toast.error(error.message);
+    toast.success(`Saved: ${row.label}`);
+    load();
+  }
+
+  const grouped = rows.reduce<Record<string, ContentRow[]>>((acc, r) => {
+    (acc[r.section] ??= []).push(r); return acc;
+  }, {});
+  const sectionTitle: Record<string, string> = { home: "Homepage", about: "About page" };
+
+  return (
+    <div className="space-y-8">
+      <p className="text-sm text-muted-foreground">Edit the text shown on the homepage and about page. Changes appear instantly on the public site.</p>
+      {Object.entries(grouped).map(([section, items]) => (
+        <div key={section} className="space-y-3">
+          <h2 className="font-serif text-xl text-primary">{sectionTitle[section] ?? section}</h2>
+          {items.map((r) => {
+            const dirty = (drafts[r.key] ?? "") !== r.value;
+            return (
+              <Card key={r.id}>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">{r.label}</label>
+                {r.multiline ? (
+                  <Textarea rows={4} value={drafts[r.key] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.key]: e.target.value })} />
+                ) : (
+                  <Input value={drafts[r.key] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.key]: e.target.value })} />
+                )}
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{dirty ? "Unsaved changes" : "Saved"}</span>
+                  <Btn disabled={!dirty || savingKey === r.key} onClick={() => save(r)}>
+                    {savingKey === r.key ? <Loader2 className="size-4 animate-spin"/> : "Save"}
+                  </Btn>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       ))}
     </div>
   );

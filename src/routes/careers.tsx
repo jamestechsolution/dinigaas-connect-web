@@ -49,6 +49,11 @@ function CareersPage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
             Join a team that is shaping the future of Sheger City through education and healthcare.
+            Send applications directly to{" "}
+            <a href="mailto:dinigaastrading@gmail.com" className="font-semibold text-primary underline-offset-4 hover:underline">
+              dinigaastrading@gmail.com
+            </a>
+            .
           </p>
         </div>
       </section>

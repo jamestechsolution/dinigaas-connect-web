@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/SiteLayout";
 import { useSiteContent } from "@/hooks/use-site-content";
+import { useSiteImages } from "@/hooks/use-site-images";
 import { Heart, Target, Eye, Users } from "lucide-react";
 import schoolImg from "@/assets/school-building.jpg";
 
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   const { get } = useSiteContent("about");
+  const { get: getImg } = useSiteImages();
+  const aboutImg = getImg("about_story", schoolImg);
   return (
     <SiteLayout>
       <section className="bg-cotton py-20">
@@ -34,7 +37,7 @@ function AboutPage() {
 
       <section className="py-20">
         <div className="mx-auto grid max-w-7xl gap-14 px-6 lg:grid-cols-2 lg:px-12">
-          <img src={schoolImg} alt="Dinigaas campus" loading="lazy" width={1200} height={900} className="rounded-3xl object-cover shadow-card" />
+          <img src={aboutImg} alt="Dinigaas campus" loading="lazy" width={1200} height={900} className="rounded-3xl object-cover shadow-card" />
           <div>
             <h2 className="font-serif text-3xl text-primary md:text-4xl">Our story</h2>
             <p className="mt-5 leading-relaxed text-muted-foreground whitespace-pre-line">

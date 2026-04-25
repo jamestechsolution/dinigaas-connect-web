@@ -387,6 +387,66 @@ function SubscribersAdmin() {
   );
 }
 
+/* ------------ Site Content (homepage + about copy) ------------ */
+type ContentRow = { id: string; key: string; value: string; label: string; section: string; multiline: boolean; sort_order: number };
+function SiteContentAdmin() {
+  const [rows, setRows] = useState<ContentRow[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase.from("site_content").select("*").order("section").order("sort_order");
+    const list = (data ?? []) as ContentRow[];
+    setRows(list);
+    setDrafts(Object.fromEntries(list.map((r) => [r.key, r.value])));
+  };
+  useEffect(() => { load(); }, []);
+
+  async function save(row: ContentRow) {
+    setSavingKey(row.key);
+    const { error } = await supabase.from("site_content").update({ value: drafts[row.key] ?? "" }).eq("id", row.id);
+    setSavingKey(null);
+    if (error) return toast.error(error.message);
+    toast.success(`Saved: ${row.label}`);
+    load();
+  }
+
+  const grouped = rows.reduce<Record<string, ContentRow[]>>((acc, r) => {
+    (acc[r.section] ??= []).push(r); return acc;
+  }, {});
+  const sectionTitle: Record<string, string> = { home: "Homepage", about: "About page" };
+
+  return (
+    <div className="space-y-8">
+      <p className="text-sm text-muted-foreground">Edit the text shown on the homepage and about page. Changes appear instantly on the public site.</p>
+      {Object.entries(grouped).map(([section, items]) => (
+        <div key={section} className="space-y-3">
+          <h2 className="font-serif text-xl text-primary">{sectionTitle[section] ?? section}</h2>
+          {items.map((r) => {
+            const dirty = (drafts[r.key] ?? "") !== r.value;
+            return (
+              <Card key={r.id}>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">{r.label}</label>
+                {r.multiline ? (
+                  <Textarea rows={4} value={drafts[r.key] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.key]: e.target.value })} />
+                ) : (
+                  <Input value={drafts[r.key] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.key]: e.target.value })} />
+                )}
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{dirty ? "Unsaved changes" : "Saved"}</span>
+                  <Btn disabled={!dirty || savingKey === r.key} onClick={() => save(r)}>
+                    {savingKey === r.key ? <Loader2 className="size-4 animate-spin"/> : "Save"}
+                  </Btn>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4" onClick={onClose}>

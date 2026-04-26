@@ -83,6 +83,7 @@ function AdminPage() {
         ) : (
           <>
             <h1 className="font-serif text-3xl text-primary md:text-4xl">Dashboard</h1>
+            <EmailForwardingStatus />
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
                 ["content", FileText, "Site Content"],

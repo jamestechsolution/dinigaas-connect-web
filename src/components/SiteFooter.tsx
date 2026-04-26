@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logo from "@/assets/dinigaas-logo.jpg";
 
 export function SiteFooter() {
   const [email, setEmail] = useState("");
@@ -32,10 +33,21 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <p className="font-serif text-3xl font-semibold">Dinigaas Trading S.C.</p>
-            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground/70">
-              Education • Healthcare
-            </p>
+            <div className="flex items-center gap-4">
+              <img
+                src={logo}
+                alt="Dinigaas Trading S.C. logo"
+                width={64}
+                height={64}
+                className="size-16 shrink-0 rounded-full bg-primary-foreground/95 object-contain p-1"
+              />
+              <div>
+                <p className="font-serif text-3xl font-semibold">Dinigaas Trading S.C.</p>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground/70">
+                  Education • Healthcare
+                </p>
+              </div>
+            </div>
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-primary-foreground/75">
               Nurturing the future of Sheger City through quality education from KG1 to Grade 8 and
               accessible healthcare for our community.

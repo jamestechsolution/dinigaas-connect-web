@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X, MapPin } from "lucide-react";
 import { useNavItems } from "@/hooks/use-nav-items";
+import logo from "@/assets/dinigaas-logo.jpg";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -23,10 +24,19 @@ export function SiteHeader() {
 
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-12">
-          <Link to="/" className="flex flex-col leading-tight">
-            <span className="font-serif text-2xl font-semibold text-primary">Dinigaas</span>
-            <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-clay">
-              Trading S.C.
+          <Link to="/" className="flex items-center gap-3 leading-tight">
+            <img
+              src={logo}
+              alt="Dinigaas Trading S.C. logo"
+              width={48}
+              height={48}
+              className="size-12 shrink-0 rounded-full object-contain"
+            />
+            <span className="flex flex-col">
+              <span className="font-serif text-2xl font-semibold text-primary">Dinigaas</span>
+              <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-clay">
+                Trading S.C.
+              </span>
             </span>
           </Link>
 

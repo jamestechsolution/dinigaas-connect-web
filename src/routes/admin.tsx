@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
-  ImageIcon, Navigation, Upload,
+  ImageIcon, Navigation, Upload, MailCheck, AlertCircle, CheckCircle2, Send,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -83,6 +83,7 @@ function AdminPage() {
         ) : (
           <>
             <h1 className="font-serif text-3xl text-primary md:text-4xl">Dashboard</h1>
+            <EmailForwardingStatus />
             <nav className="mt-6 flex flex-wrap gap-2">
               {([
                 ["content", FileText, "Site Content"],
@@ -136,6 +137,104 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
 }
 function Btn({ children, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return <button {...p} className={"inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-light disabled:opacity-60 " + (p.className ?? "")}>{children}</button>;
+}
+
+/* ------------ Email forwarding status ------------ */
+const FORWARD_EMAIL = "dinigaastrading@gmail.com";
+type ForwardTest = { at: string; ok: boolean; detail: string };
+
+function EmailForwardingStatus() {
+  // Auto-forwarding requires a verified email domain. Until that's configured,
+  // messages are saved to the dashboard inbox only.
+  const configured = false;
+  const [lastTest, setLastTest] = useState<ForwardTest | null>(null);
+  const [testing, setTesting] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("dinigaas:lastForwardTest");
+      if (raw) setLastTest(JSON.parse(raw) as ForwardTest);
+    } catch { /* ignore */ }
+  }, []);
+
+  async function runTest() {
+    setTesting(true);
+    // Simulated probe: sends a test contact_message (admins can verify in inbox).
+    // When forwarding is configured, this same insert will trigger the auto-forward.
+    const { error } = await supabase.from("contact_messages").insert({
+      name: "Forwarding Test",
+      email: "test@dinigaas.local",
+      subject: "[Test] Forwarding probe",
+      message: `Probe sent at ${new Date().toISOString()}. If forwarding is configured, this should arrive at ${FORWARD_EMAIL}.`,
+    });
+    const result: ForwardTest = error
+      ? { at: new Date().toISOString(), ok: false, detail: error.message }
+      : { at: new Date().toISOString(), ok: true, detail: configured
+          ? `Test message queued for ${FORWARD_EMAIL}.`
+          : `Saved to dashboard inbox. Forwarding to ${FORWARD_EMAIL} is not configured yet.` };
+    try { localStorage.setItem("dinigaas:lastForwardTest", JSON.stringify(result)); } catch { /* ignore */ }
+    setLastTest(result);
+    setTesting(false);
+    if (error) toast.error("Test failed"); else toast.success("Test sent");
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-background p-5 shadow-card">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className={`grid size-10 shrink-0 place-items-center rounded-2xl ${configured ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+            <MailCheck className="size-5" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Email forwarding</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Forward to <span className="font-medium text-foreground">{FORWARD_EMAIL}</span>
+            </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide"
+              style={{ borderColor: configured ? "rgb(187 247 208)" : "rgb(253 230 138)", color: configured ? "rgb(21 128 61)" : "rgb(146 64 14)", background: configured ? "rgb(240 253 244)" : "rgb(255 251 235)" }}>
+              {configured ? <CheckCircle2 className="size-3" /> : <AlertCircle className="size-3" />}
+              {configured ? "Configured" : "Not configured"}
+            </div>
+            {!configured && (
+              <p className="mt-2 max-w-lg text-xs text-muted-foreground">
+                New contact submissions are saved here in the Messages tab. To auto-forward each
+                message to your inbox, set up a verified sender domain.
+              </p>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={runTest}
+          disabled={testing}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-60"
+        >
+          {testing ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          Run test
+        </button>
+      </div>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Last test</p>
+        {lastTest ? (
+          <div className="mt-2 flex items-start gap-2 text-sm">
+            {lastTest.ok ? (
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+            ) : (
+              <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
+            )}
+            <div>
+              <p className={lastTest.ok ? "text-foreground" : "text-destructive"}>
+                {lastTest.ok ? "Success" : "Failed"} · {new Date(lastTest.at).toLocaleString()}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{lastTest.detail}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">No test run yet.</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ------------ Products ------------ */

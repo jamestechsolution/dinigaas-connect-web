@@ -239,10 +239,15 @@ function EmailForwardingStatus() {
 }
 
 /* ------------ Logo preview ------------ */
+type MaskMode = "contain" | "cover";
+
 function LogoPreview() {
+  const [mode, setMode] = useState<MaskMode>("contain");
+  const fit = mode === "contain" ? "object-contain" : "object-cover";
+
   return (
-    <div className="rounded-2xl border border-border bg-background p-5 shadow-card">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rounded-2xl border border-border bg-background p-5 shadow-card animate-fade-in">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-serif text-xl text-primary">Logo preview</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -250,44 +255,85 @@ function LogoPreview() {
             <span className="font-medium text-foreground"> brand_logo</span> slot below.
           </p>
         </div>
-        <span className="hidden shrink-0 rounded-full border border-border bg-cotton px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:inline-block">
-          Live preview
-        </span>
+
+        {/* Mask mode toggle */}
+        <div className="flex items-center gap-2">
+          <span className="hidden text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:inline-block">
+            Mask mode
+          </span>
+          <div
+            role="tablist"
+            aria-label="Logo mask mode"
+            className="relative inline-flex items-center rounded-full border border-border bg-cotton p-1 shadow-inner"
+          >
+            <span
+              aria-hidden
+              className="absolute top-1 bottom-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-soft transition-transform duration-300 ease-out"
+              style={{ transform: mode === "cover" ? "translateX(100%)" : "translateX(0%)" }}
+            />
+            {(["contain", "cover"] as MaskMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={mode === m}
+                onClick={() => setMode(m)}
+                className={`relative z-10 min-w-[5rem] rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors duration-200 ${
+                  mode === m ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+      <div key={mode} className="mt-5 grid gap-4 animate-fade-in lg:grid-cols-3">
         {/* Header preview */}
-        <div className="rounded-2xl border border-border bg-cotton p-4">
+        <div className="group rounded-2xl border border-border bg-cotton p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft">
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Header (48 × 48)</p>
           <div className="mt-3 rounded-xl bg-background p-3 shadow-soft">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo header preview" width={48} height={48} className="size-12 shrink-0 rounded-full object-contain" />
+              <div className="size-12 shrink-0 overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
+                <img src={logo} alt="Logo header preview" width={48} height={48} className={`size-full ${fit} transition-all duration-300`} />
+              </div>
               <span className="flex flex-col leading-tight">
                 <span className="font-serif text-2xl font-semibold text-primary">Dinigaas</span>
                 <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-clay">Trading S.C.</span>
               </span>
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Round mask, transparent or solid background works.</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {mode === "contain"
+              ? "Whole mark visible, may show background around edges."
+              : "Fills the circle — edges of the artwork get cropped."}
+          </p>
         </div>
 
         {/* Footer preview */}
-        <div className="rounded-2xl border border-border bg-cotton p-4">
+        <div className="group rounded-2xl border border-border bg-cotton p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft">
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Footer (64 × 64)</p>
           <div className="mt-3 rounded-xl bg-primary p-4 text-primary-foreground">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo footer preview" width={64} height={64} className="size-16 shrink-0 rounded-full bg-primary-foreground/95 object-contain p-1" />
+              <div className="size-16 shrink-0 overflow-hidden rounded-full bg-primary-foreground/95 p-1 transition-transform duration-300 group-hover:scale-105">
+                <img src={logo} alt="Logo footer preview" width={64} height={64} className={`size-full rounded-full ${fit} transition-all duration-300`} />
+              </div>
               <div className="leading-tight">
                 <p className="font-serif text-lg font-semibold">Dinigaas Trading S.C.</p>
                 <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-primary-foreground/70">Education • Healthcare</p>
               </div>
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Sits on the dark brand panel with a light backdrop.</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {mode === "contain"
+              ? "Mark padded inside the light backdrop — safest default."
+              : "Mark fills the backdrop — best for full-bleed marks."}
+          </p>
         </div>
 
         {/* Favicon / browser tab preview */}
-        <div className="rounded-2xl border border-border bg-cotton p-4">
+        <div className="group rounded-2xl border border-border bg-cotton p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft">
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Favicon (browser tab)</p>
           <div className="mt-3 overflow-hidden rounded-t-xl border border-b-0 border-border bg-background">
             <div className="flex items-center gap-2 border-b border-border bg-muted px-3 py-2">
@@ -297,7 +343,9 @@ function LogoPreview() {
                 <span className="size-2.5 rounded-full bg-emerald-500" />
               </div>
               <div className="ml-2 flex max-w-[180px] items-center gap-2 truncate rounded-t-md bg-background px-2.5 py-1.5 text-[11px] text-foreground">
-                <img src={logo} alt="Favicon preview" width={14} height={14} className="size-3.5 shrink-0 rounded-sm object-contain" />
+                <span className="size-3.5 shrink-0 overflow-hidden rounded-sm">
+                  <img src={logo} alt="Favicon preview" width={14} height={14} className={`size-full ${fit} transition-all duration-300`} />
+                </span>
                 <span className="truncate">Dinigaas Trading S.C.</span>
               </div>
             </div>
@@ -307,12 +355,23 @@ function LogoPreview() {
           </div>
           <div className="rounded-b-xl border border-t-0 border-border bg-muted/40 px-3 py-2">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Favicon at 16px" width={16} height={16} className="size-4 rounded-sm object-contain" />
-              <img src={logo} alt="Favicon at 32px" width={32} height={32} className="size-8 rounded-md object-contain" />
-              <img src={logo} alt="Favicon at 64px" width={64} height={64} className="size-16 rounded-lg object-contain" />
+              <span className="size-4 overflow-hidden rounded-sm">
+                <img src={logo} alt="Favicon at 16px" width={16} height={16} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
+              <span className="size-8 overflow-hidden rounded-md transition-transform duration-300 group-hover:scale-110">
+                <img src={logo} alt="Favicon at 32px" width={32} height={32} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
+              <span className="size-16 overflow-hidden rounded-lg transition-transform duration-300 group-hover:scale-105">
+                <img src={logo} alt="Favicon at 64px" width={64} height={64} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
               <span className="ml-auto text-[10px] text-muted-foreground">16 · 32 · 64 px</span>
             </div>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {mode === "contain"
+              ? "Mark stays whole — best for logos with text or thin marks."
+              : "Mark fills the tile — best for square, edge-to-edge marks."}
+          </p>
         </div>
       </div>
 

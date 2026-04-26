@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, LogOut, Package, Newspaper, Briefcase, Mail, Inbox, Plus, Trash2, Pencil, X, FileText,
-  ImageIcon, Navigation, Upload,
+  ImageIcon, Navigation, Upload, MailCheck, AlertCircle, CheckCircle2, Send,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({

@@ -182,7 +182,7 @@ function EmailForwardingStatus() {
     <div className="mt-6 rounded-2xl border border-border bg-background p-5 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <span className={`grid size-10 shrink-0 place-items-center rounded-2xl ${configured ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+          <span className={`grid size-10 shrink-0 place-items-center rounded-2xl ${configured ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
             <MailCheck className="size-5" />
           </span>
           <div>

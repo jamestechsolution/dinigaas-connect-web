@@ -333,7 +333,7 @@ function LogoPreview() {
         </div>
 
         {/* Favicon / browser tab preview */}
-        <div className="rounded-2xl border border-border bg-cotton p-4">
+        <div className="group rounded-2xl border border-border bg-cotton p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft">
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Favicon (browser tab)</p>
           <div className="mt-3 overflow-hidden rounded-t-xl border border-b-0 border-border bg-background">
             <div className="flex items-center gap-2 border-b border-border bg-muted px-3 py-2">
@@ -343,7 +343,9 @@ function LogoPreview() {
                 <span className="size-2.5 rounded-full bg-emerald-500" />
               </div>
               <div className="ml-2 flex max-w-[180px] items-center gap-2 truncate rounded-t-md bg-background px-2.5 py-1.5 text-[11px] text-foreground">
-                <img src={logo} alt="Favicon preview" width={14} height={14} className="size-3.5 shrink-0 rounded-sm object-contain" />
+                <span className="size-3.5 shrink-0 overflow-hidden rounded-sm">
+                  <img src={logo} alt="Favicon preview" width={14} height={14} className={`size-full ${fit} transition-all duration-300`} />
+                </span>
                 <span className="truncate">Dinigaas Trading S.C.</span>
               </div>
             </div>
@@ -353,12 +355,23 @@ function LogoPreview() {
           </div>
           <div className="rounded-b-xl border border-t-0 border-border bg-muted/40 px-3 py-2">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Favicon at 16px" width={16} height={16} className="size-4 rounded-sm object-contain" />
-              <img src={logo} alt="Favicon at 32px" width={32} height={32} className="size-8 rounded-md object-contain" />
-              <img src={logo} alt="Favicon at 64px" width={64} height={64} className="size-16 rounded-lg object-contain" />
+              <span className="size-4 overflow-hidden rounded-sm">
+                <img src={logo} alt="Favicon at 16px" width={16} height={16} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
+              <span className="size-8 overflow-hidden rounded-md transition-transform duration-300 group-hover:scale-110">
+                <img src={logo} alt="Favicon at 32px" width={32} height={32} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
+              <span className="size-16 overflow-hidden rounded-lg transition-transform duration-300 group-hover:scale-105">
+                <img src={logo} alt="Favicon at 64px" width={64} height={64} className={`size-full ${fit} transition-all duration-300`} />
+              </span>
               <span className="ml-auto text-[10px] text-muted-foreground">16 · 32 · 64 px</span>
             </div>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {mode === "contain"
+              ? "Mark stays whole — best for logos with text or thin marks."
+              : "Mark fills the tile — best for square, edge-to-edge marks."}
+          </p>
         </div>
       </div>
 

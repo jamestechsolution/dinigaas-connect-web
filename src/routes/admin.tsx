@@ -218,7 +218,7 @@ function EmailForwardingStatus() {
         {lastTest ? (
           <div className="mt-2 flex items-start gap-2 text-sm">
             {lastTest.ok ? (
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-green-600" />
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" />
             ) : (
               <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
             )}

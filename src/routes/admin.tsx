@@ -612,6 +612,7 @@ function SiteImagesAdmin() {
 
   return (
     <div className="space-y-8">
+      <LogoPreview />
       <div>
         <h2 className="font-serif text-xl text-primary">Image slots</h2>
         <p className="mt-1 text-sm text-muted-foreground">Pick which uploaded image appears in each slot. Changes go live instantly.</p>

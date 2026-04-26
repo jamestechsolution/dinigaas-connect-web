@@ -116,3 +116,101 @@
   }
   h1, h2, h3, h4 { font-family: var(--font-serif); letter-spacing: -0.01em; }
 }
+
+/* ---------- Motion utilities ---------- */
+@keyframes dg-rise {
+  0%   { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes dg-rise-sm {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes dg-zoom {
+  0%   { opacity: 0; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes dg-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes dg-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes dg-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent); }
+  70%  { box-shadow: 0 0 0 16px color-mix(in oklab, var(--primary) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent); }
+}
+
+/* Reveal on scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animation helpers (additive to tailwind animate utilities) */
+.animate-rise        { animation: dg-rise 0.7s ease-out both; }
+.animate-rise-sm     { animation: dg-rise-sm 0.5s ease-out both; }
+.animate-zoom-in     { animation: dg-zoom 0.9s ease-out both; }
+.animate-float       { animation: dg-float 6s ease-in-out infinite; }
+.animate-pulse-ring  { animation: dg-pulse-ring 2.4s ease-out infinite; }
+
+/* Stagger via delay utilities */
+.delay-100 { animation-delay: .1s; }
+.delay-200 { animation-delay: .2s; }
+.delay-300 { animation-delay: .3s; }
+.delay-400 { animation-delay: .4s; }
+.delay-500 { animation-delay: .5s; }
+
+/* Card lift */
+.lift {
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -20px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+/* Image hover zoom (use on wrapper with overflow-hidden) */
+.zoom-img > img {
+  transition: transform .9s ease;
+}
+.zoom-img:hover > img {
+  transform: scale(1.06);
+}
+
+/* Underline grow link */
+.story-link {
+  position: relative;
+  display: inline-block;
+}
+.story-link::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  height: 2px; width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .35s ease;
+}
+.story-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.is-visible { opacity: 1; transform: none; transition: none; }
+  .animate-rise, .animate-rise-sm, .animate-zoom-in, .animate-float, .animate-pulse-ring { animation: none; }
+  .lift:hover { transform: none; box-shadow: none; }
+  .zoom-img > img { transition: none; }
+  .zoom-img:hover > img { transform: none; }
+}

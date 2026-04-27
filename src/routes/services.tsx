@@ -1,20 +1,34 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/SiteLayout";
-import { GraduationCap, Stethoscope, ShoppingBag, ArrowRight } from "lucide-react";
+import {
+  GraduationCap,
+  Stethoscope,
+  Mountain,
+  Wheat,
+  ShoppingBag,
+  ArrowRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Services — Dinigaas Trading S.C." },
-      { name: "description", content: "Our education, healthcare and trading services serving Sheger City, Ethiopia." },
+      {
+        name: "description",
+        content:
+          "Our work across Education, Health, Mining, Agriculture and Commerce serving Sheger City, Ethiopia.",
+      },
       { property: "og:title", content: "Services — Dinigaas Trading S.C." },
-      { property: "og:description", content: "Education, healthcare and trading services." },
+      {
+        property: "og:description",
+        content: "Education, Health, Mining, Agriculture and Commerce.",
+      },
     ],
   }),
   component: ServicesPage,
 });
 
-const SERVICES = [
+const SECTORS = [
   {
     Icon: GraduationCap,
     title: "Education",
@@ -28,23 +42,43 @@ const SERVICES = [
   },
   {
     Icon: Stethoscope,
-    title: "Healthcare",
+    title: "Health",
     items: [
       "General outpatient consultations",
       "Maternal & child health",
       "Vaccination & immunization",
       "Laboratory & diagnostic services",
-      "Health education & community outreach",
+      "Community health outreach",
+    ],
+  },
+  {
+    Icon: Mountain,
+    title: "Mining",
+    items: [
+      "Responsible mineral sourcing",
+      "Local community partnerships",
+      "Safe extraction practices",
+      "Logistics & supply support",
+    ],
+  },
+  {
+    Icon: Wheat,
+    title: "Agriculture",
+    items: [
+      "Crop production & supply",
+      "Smallholder farmer support",
+      "Modern farming inputs",
+      "Post-harvest handling",
     ],
   },
   {
     Icon: ShoppingBag,
-    title: "Trading & Supply",
+    title: "Commerce",
     items: [
-      "Educational materials supply",
-      "Medical supplies sourcing",
-      "General trading operations",
-      "Local distribution",
+      "General trading & distribution",
+      "Educational & medical supplies",
+      "Wholesale & retail operations",
+      "Local market development",
     ],
   },
 ];

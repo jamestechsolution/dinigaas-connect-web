@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "content" | "images" | "nav" | "products" | "news" | "careers" | "messages" | "subscribers";
+type Tab = "content" | "images" | "nav" | "products" | "news" | "careers" | "messages" | "subscribers" | "registrations";
 
 function AdminPage() {
   const navigate = useNavigate();

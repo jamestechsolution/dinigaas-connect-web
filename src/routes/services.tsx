@@ -28,7 +28,9 @@ export const Route = createFileRoute("/services")({
   component: ServicesPage,
 });
 
-const SECTORS = [
+type Sector = { Icon: typeof GraduationCap; title: string; items: string[] };
+
+const SECTORS: Sector[] = [
   {
     Icon: GraduationCap,
     title: "Education",

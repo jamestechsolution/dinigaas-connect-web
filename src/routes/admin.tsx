@@ -1192,12 +1192,11 @@ function RegistrationsAdmin() {
       ) : (
         <div className="grid gap-3">
           {pageItems.map((r) => {
-            const open = expanded === r.id;
             return (
               <Card key={r.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <button
-                    onClick={() => setExpanded(open ? null : r.id)}
+                    onClick={() => setSelectedId(r.id)}
                     className="flex-1 text-left"
                   >
                     <div className="flex flex-wrap items-center gap-2">
@@ -1218,22 +1217,9 @@ function RegistrationsAdmin() {
                       {r.relationship}: {r.parent_name} · {r.parent_email} · {r.parent_phone} ·{" "}
                       {new Date(r.created_at).toLocaleString()}
                     </p>
-                    {open && (
-                      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                        <Detail label="Date of birth" value={r.student_date_of_birth} />
-                        <Detail label="Gender" value={r.student_gender} />
-                        <Detail label="Previous school" value={r.previous_school || "—"} />
-                        <Detail label="Address" value={r.address || "—"} />
-                        {r.notes && (
-                          <div className="sm:col-span-2">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                              Notes
-                            </p>
-                            <p className="mt-1 whitespace-pre-line text-foreground">{r.notes}</p>
-                          </div>
-                        )}
-                      </dl>
-                    )}
+                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-widest text-primary/70">
+                      Click to view full details →
+                    </p>
                   </button>
                   <div className="flex flex-col gap-2 lg:w-56">
                     <select

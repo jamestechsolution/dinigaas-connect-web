@@ -79,6 +79,7 @@ export function SiteFooter() {
                 ["/about", "About"],
                 ["/services", "Services"],
                 ["/products", "Programs"],
+                ["/register", "Register student"],
                 ["/news", "News"],
                 ["/careers", "Careers"],
                 ["/contact", "Contact"],

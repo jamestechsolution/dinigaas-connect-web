@@ -17,7 +17,7 @@ export function SiteHeader() {
             Sheger City, Gefarsa Gujje Kella
           </p>
           <p className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/85 md:block">
-            Education • Healthcare • Trading
+            Education • Health • Mining • Agriculture • Commerce
           </p>
         </div>
       </div>

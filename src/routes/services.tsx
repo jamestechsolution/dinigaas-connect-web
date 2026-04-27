@@ -100,8 +100,8 @@ function ServicesPage() {
       </section>
 
       <section className="py-20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-3 lg:px-12">
-          {SERVICES.map(({ Icon, title, items }) => (
+        <div className="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-12">
+          {SECTORS.map(({ Icon, title, items }) => (
             <article key={title} className="rounded-3xl border border-border bg-background p-8 shadow-card">
               <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
                 <Icon className="size-6" />

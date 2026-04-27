@@ -964,7 +964,7 @@ function RegistrationsAdmin() {
   const [statusFilter, setStatusFilter] = useState<"all" | "unread" | "read" | (typeof STATUS_OPTIONS)[number]>("all");
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -976,6 +976,8 @@ function RegistrationsAdmin() {
   useEffect(() => {
     load();
   }, []);
+
+  const selected = items.find((r) => r.id === selectedId) ?? null;
 
   const filtered = items.filter((r) => {
     if (statusFilter === "unread" && r.read) return false;
@@ -1190,12 +1192,11 @@ function RegistrationsAdmin() {
       ) : (
         <div className="grid gap-3">
           {pageItems.map((r) => {
-            const open = expanded === r.id;
             return (
               <Card key={r.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <button
-                    onClick={() => setExpanded(open ? null : r.id)}
+                    onClick={() => setSelectedId(r.id)}
                     className="flex-1 text-left"
                   >
                     <div className="flex flex-wrap items-center gap-2">
@@ -1216,22 +1217,9 @@ function RegistrationsAdmin() {
                       {r.relationship}: {r.parent_name} · {r.parent_email} · {r.parent_phone} ·{" "}
                       {new Date(r.created_at).toLocaleString()}
                     </p>
-                    {open && (
-                      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                        <Detail label="Date of birth" value={r.student_date_of_birth} />
-                        <Detail label="Gender" value={r.student_gender} />
-                        <Detail label="Previous school" value={r.previous_school || "—"} />
-                        <Detail label="Address" value={r.address || "—"} />
-                        {r.notes && (
-                          <div className="sm:col-span-2">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                              Notes
-                            </p>
-                            <p className="mt-1 whitespace-pre-line text-foreground">{r.notes}</p>
-                          </div>
-                        )}
-                      </dl>
-                    )}
+                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-widest text-primary/70">
+                      Click to view full details →
+                    </p>
                   </button>
                   <div className="flex flex-col gap-2 lg:w-56">
                     <select
@@ -1291,6 +1279,264 @@ function RegistrationsAdmin() {
           </div>
         </div>
       )}
+
+      <RegistrationDrawer
+        registration={selected}
+        onClose={() => setSelectedId(null)}
+        onStatusChange={(value) => selected && setStatus(selected, value)}
+        onToggleRead={() => selected && setRead(selected, !selected.read)}
+        busy={busy}
+      />
+    </div>
+  );
+}
+
+type StatusEvent = {
+  id: string;
+  from_status: string | null;
+  to_status: string;
+  note: string | null;
+  created_at: string;
+};
+
+function RegistrationDrawer({
+  registration,
+  onClose,
+  onStatusChange,
+  onToggleRead,
+  busy,
+}: {
+  registration: Reg | null;
+  onClose: () => void;
+  onStatusChange: (status: string) => void;
+  onToggleRead: () => void;
+  busy: boolean;
+}) {
+  const [history, setHistory] = useState<StatusEvent[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const open = !!registration;
+
+  useEffect(() => {
+    if (!registration) return;
+    let cancelled = false;
+    setLoadingHistory(true);
+    (async () => {
+      const { data, error } = await (supabase as any)
+        .from("student_registration_status_history")
+        .select("id, from_status, to_status, note, created_at")
+        .eq("registration_id", registration.id)
+        .order("created_at", { ascending: false });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Could not load status history");
+        setHistory([]);
+      } else {
+        setHistory((data ?? []) as StatusEvent[]);
+      }
+      setLoadingHistory(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [registration?.id, registration?.status, registration?.updated_at]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  if (!registration) return null;
+  const r = registration;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      {/* Overlay */}
+      <button
+        aria-label="Close details"
+        onClick={onClose}
+        className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in"
+      />
+      {/* Drawer */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Registration details"
+        className="absolute right-0 top-0 flex h-full w-full max-w-xl flex-col bg-background shadow-2xl animate-in slide-in-from-right duration-300"
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Registration
+            </p>
+            <h2 className="mt-1 font-serif text-2xl text-primary">
+              {r.student_first_name} {r.student_last_name}
+            </h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                {r.grade_applying_for}
+              </span>
+              <StatusBadge status={r.status} />
+              {!r.read && (
+                <span className="rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-bold uppercase text-clay">
+                  New
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full border border-border p-2 text-muted-foreground hover:bg-accent"
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <section>
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Parent / Guardian
+            </h3>
+            <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <Detail label="Name" value={r.parent_name} />
+              <Detail label="Relationship" value={r.relationship} />
+              <Detail label="Email" value={r.parent_email} />
+              <Detail label="Phone" value={r.parent_phone} />
+              <div className="sm:col-span-2">
+                <Detail label="Address" value={r.address || "—"} />
+              </div>
+            </dl>
+          </section>
+
+          <section className="mt-6">
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Student
+            </h3>
+            <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <Detail label="First name" value={r.student_first_name} />
+              <Detail label="Last name" value={r.student_last_name} />
+              <Detail label="Date of birth" value={r.student_date_of_birth} />
+              <Detail label="Gender" value={r.student_gender} />
+              <Detail label="Grade applying for" value={r.grade_applying_for} />
+              <Detail label="Previous school" value={r.previous_school || "—"} />
+            </dl>
+            {r.notes && (
+              <div className="mt-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Notes
+                </p>
+                <p className="mt-1 whitespace-pre-line rounded-xl border border-border bg-cotton px-3 py-2 text-sm text-foreground">
+                  {r.notes}
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Submission
+              </h3>
+            </div>
+            <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <Detail label="Submitted" value={new Date(r.created_at).toLocaleString()} />
+              <Detail label="Last update" value={new Date(r.updated_at).toLocaleString()} />
+            </dl>
+          </section>
+
+          <section className="mt-6">
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Status timeline
+            </h3>
+            {loadingHistory ? (
+              <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> Loading history…
+              </div>
+            ) : history.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">No status changes recorded.</p>
+            ) : (
+              <ol className="mt-4 space-y-4 border-l-2 border-border pl-5">
+                {history.map((ev, i) => (
+                  <li key={ev.id} className="relative">
+                    <span
+                      className={`absolute -left-[27px] top-1.5 size-3 rounded-full ring-4 ring-background ${
+                        i === 0 ? "bg-primary" : "bg-muted-foreground/40"
+                      }`}
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      {ev.from_status ? (
+                        <>
+                          <StatusBadge status={ev.from_status} />
+                          <span className="text-xs text-muted-foreground">→</span>
+                          <StatusBadge status={ev.to_status} />
+                        </>
+                      ) : (
+                        <StatusBadge status={ev.to_status} />
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(ev.created_at).toLocaleString()}
+                    </p>
+                    {ev.note && (
+                      <p className="mt-1 text-xs italic text-foreground/80">{ev.note}</p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+        </div>
+
+        <footer className="flex flex-col gap-3 border-t border-border bg-cotton px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Status
+            </label>
+            <select
+              value={r.status}
+              onChange={(e) => onStatusChange(e.target.value)}
+              disabled={busy}
+              className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggleRead}
+              disabled={busy}
+              className="rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-accent"
+            >
+              {r.read ? "Mark unread" : "Mark read"}
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-light"
+            >
+              Close
+            </button>
+          </div>
+        </footer>
+      </aside>
     </div>
   );
 }

@@ -263,6 +263,44 @@ export type Database = {
         }
         Relationships: []
       }
+      student_registration_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          registration_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          registration_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          registration_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_registration_status_history_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "student_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_registrations: {
         Row: {
           address: string | null

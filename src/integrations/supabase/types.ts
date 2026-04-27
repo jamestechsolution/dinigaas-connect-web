@@ -263,6 +263,66 @@ export type Database = {
         }
         Relationships: []
       }
+      student_registrations: {
+        Row: {
+          address: string | null
+          created_at: string
+          grade_applying_for: string
+          id: string
+          notes: string | null
+          parent_email: string
+          parent_name: string
+          parent_phone: string
+          previous_school: string | null
+          read: boolean
+          relationship: string
+          status: string
+          student_date_of_birth: string
+          student_first_name: string
+          student_gender: string
+          student_last_name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          grade_applying_for: string
+          id?: string
+          notes?: string | null
+          parent_email: string
+          parent_name: string
+          parent_phone: string
+          previous_school?: string | null
+          read?: boolean
+          relationship?: string
+          status?: string
+          student_date_of_birth: string
+          student_first_name: string
+          student_gender: string
+          student_last_name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          grade_applying_for?: string
+          id?: string
+          notes?: string | null
+          parent_email?: string
+          parent_name?: string
+          parent_phone?: string
+          previous_school?: string | null
+          read?: boolean
+          relationship?: string
+          status?: string
+          student_date_of_birth?: string
+          student_first_name?: string
+          student_gender?: string
+          student_last_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

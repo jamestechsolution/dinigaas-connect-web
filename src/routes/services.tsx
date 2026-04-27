@@ -1,20 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/SiteLayout";
-import { GraduationCap, Stethoscope, ShoppingBag, ArrowRight } from "lucide-react";
+import {
+  GraduationCap,
+  Stethoscope,
+  Mountain,
+  Wheat,
+  ShoppingBag,
+  ArrowRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "Services — Dinigaas Trading S.C." },
-      { name: "description", content: "Our education, healthcare and trading services serving Sheger City, Ethiopia." },
+      {
+        name: "description",
+        content:
+          "Our work across Education, Health, Mining, Agriculture and Commerce serving Sheger City, Ethiopia.",
+      },
       { property: "og:title", content: "Services — Dinigaas Trading S.C." },
-      { property: "og:description", content: "Education, healthcare and trading services." },
+      {
+        property: "og:description",
+        content: "Education, Health, Mining, Agriculture and Commerce.",
+      },
     ],
   }),
   component: ServicesPage,
 });
 
-const SERVICES = [
+type Sector = { Icon: typeof GraduationCap; title: string; items: string[] };
+
+const SECTORS: Sector[] = [
   {
     Icon: GraduationCap,
     title: "Education",
@@ -28,23 +44,43 @@ const SERVICES = [
   },
   {
     Icon: Stethoscope,
-    title: "Healthcare",
+    title: "Health",
     items: [
       "General outpatient consultations",
       "Maternal & child health",
       "Vaccination & immunization",
       "Laboratory & diagnostic services",
-      "Health education & community outreach",
+      "Community health outreach",
+    ],
+  },
+  {
+    Icon: Mountain,
+    title: "Mining",
+    items: [
+      "Responsible mineral sourcing",
+      "Local community partnerships",
+      "Safe extraction practices",
+      "Logistics & supply support",
+    ],
+  },
+  {
+    Icon: Wheat,
+    title: "Agriculture",
+    items: [
+      "Crop production & supply",
+      "Smallholder farmer support",
+      "Modern farming inputs",
+      "Post-harvest handling",
     ],
   },
   {
     Icon: ShoppingBag,
-    title: "Trading & Supply",
+    title: "Commerce",
     items: [
-      "Educational materials supply",
-      "Medical supplies sourcing",
-      "General trading operations",
-      "Local distribution",
+      "General trading & distribution",
+      "Educational & medical supplies",
+      "Wholesale & retail operations",
+      "Local market development",
     ],
   },
 ];
@@ -66,8 +102,8 @@ function ServicesPage() {
       </section>
 
       <section className="py-20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-3 lg:px-12">
-          {SERVICES.map(({ Icon, title, items }) => (
+        <div className="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-12">
+          {SECTORS.map(({ Icon, title, items }) => (
             <article key={title} className="rounded-3xl border border-border bg-background p-8 shadow-card">
               <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
                 <Icon className="size-6" />
@@ -88,16 +124,24 @@ function ServicesPage() {
 
       <section className="py-16">
         <div className="mx-auto max-w-5xl rounded-3xl bg-primary p-10 text-center text-primary-foreground md:p-16">
-          <h2 className="font-serif text-4xl md:text-5xl">Ready to enroll or visit?</h2>
+          <h2 className="font-serif text-4xl md:text-5xl">Ready to enroll your child?</h2>
           <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-            Reach out to our admissions or clinic team. We'd love to welcome you.
+            Parents can register a student online in minutes. Our admissions team will handle the rest.
           </p>
-          <Link
-            to="/contact"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary-foreground px-7 py-3 text-sm font-semibold text-primary hover:bg-primary-foreground/90"
-          >
-            Contact us <ArrowRight className="size-4" />
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 rounded-full bg-primary-foreground px-7 py-3 text-sm font-semibold text-primary hover:bg-primary-foreground/90"
+            >
+              Register a student <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/40 px-7 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              Contact us
+            </Link>
+          </div>
         </div>
       </section>
     </SiteLayout>

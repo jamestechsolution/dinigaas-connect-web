@@ -44,7 +44,7 @@ export function SiteFooter() {
               <div>
                 <p className="font-serif text-3xl font-semibold">Dinigaas Trading S.C.</p>
                 <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground/70">
-                  Education • Healthcare
+                  Education • Health • Mining • Agriculture • Commerce
                 </p>
               </div>
             </div>
@@ -79,6 +79,7 @@ export function SiteFooter() {
                 ["/about", "About"],
                 ["/services", "Services"],
                 ["/products", "Programs"],
+                ["/register", "Register student"],
                 ["/news", "News"],
                 ["/careers", "Careers"],
                 ["/contact", "Contact"],

@@ -17,7 +17,7 @@ export function SiteHeader() {
             Sheger City, Gefarsa Gujje Kella
           </p>
           <p className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/85 md:block">
-            Education • Healthcare • Trading
+            Education • Health • Mining • Agriculture • Commerce
           </p>
         </div>
       </div>
@@ -56,6 +56,12 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-3">
             <Link
+              to="/register"
+              className="hidden rounded-full border border-primary/20 px-4 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 lg:inline-block"
+            >
+              Register student
+            </Link>
+            <Link
               to="/contact"
               className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary-light lg:inline-block"
             >
@@ -88,9 +94,16 @@ export function SiteHeader() {
                 </Link>
               ))}
               <Link
+                to="/register"
+                onClick={() => setOpen(false)}
+                className="mt-2 rounded-full border border-primary/30 px-5 py-3 text-center text-sm font-semibold text-primary"
+              >
+                Register student
+              </Link>
+              <Link
                 to="/contact"
                 onClick={() => setOpen(false)}
-                className="mt-2 rounded-full bg-primary px-5 py-3 text-center text-sm font-semibold text-primary-foreground"
+                className="rounded-full bg-primary px-5 py-3 text-center text-sm font-semibold text-primary-foreground"
               >
                 Contact us
               </Link>

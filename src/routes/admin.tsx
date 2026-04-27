@@ -933,3 +933,393 @@ function Modal({ children, onClose, title }: { children: React.ReactNode; onClos
     </div>
   );
 }
+
+/* ------------ Student Registrations ------------ */
+type Reg = {
+  id: string;
+  parent_name: string;
+  parent_email: string;
+  parent_phone: string;
+  relationship: string;
+  student_first_name: string;
+  student_last_name: string;
+  student_date_of_birth: string;
+  student_gender: string;
+  grade_applying_for: string;
+  previous_school: string | null;
+  address: string | null;
+  notes: string | null;
+  status: string;
+  read: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+const STATUS_OPTIONS = ["pending", "contacted", "accepted", "rejected"] as const;
+const PAGE_SIZE = 10;
+
+function RegistrationsAdmin() {
+  const [items, setItems] = useState<Reg[]>([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "unread" | "read" | (typeof STATUS_OPTIONS)[number]>("all");
+  const [page, setPage] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("student_registrations")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setItems((data ?? []) as Reg[]);
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const filtered = items.filter((r) => {
+    if (statusFilter === "unread" && r.read) return false;
+    if (statusFilter === "read" && !r.read) return false;
+    if (
+      statusFilter !== "all" &&
+      statusFilter !== "unread" &&
+      statusFilter !== "read" &&
+      r.status !== statusFilter
+    )
+      return false;
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    return (
+      r.parent_name.toLowerCase().includes(q) ||
+      r.parent_email.toLowerCase().includes(q) ||
+      r.parent_phone.toLowerCase().includes(q) ||
+      `${r.student_first_name} ${r.student_last_name}`.toLowerCase().includes(q) ||
+      r.grade_applying_for.toLowerCase().includes(q)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const unreadCount = items.filter((r) => !r.read).length;
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
+
+  async function setRead(r: Reg, value: boolean) {
+    setBusy(true);
+    const { error } = await supabase
+      .from("student_registrations")
+      .update({ read: value })
+      .eq("id", r.id);
+    setBusy(false);
+    if (error) return toast.error("Could not update");
+    toast.success(value ? "Marked as read" : "Marked as unread");
+    load();
+  }
+
+  async function setStatus(r: Reg, status: string) {
+    setBusy(true);
+    const { error } = await supabase
+      .from("student_registrations")
+      .update({ status, read: true })
+      .eq("id", r.id);
+    setBusy(false);
+    if (error) return toast.error("Could not update status");
+    toast.success("Status updated");
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Delete this registration?")) return;
+    const { error } = await supabase.from("student_registrations").delete().eq("id", id);
+    if (error) return toast.error("Could not delete");
+    toast.success("Deleted");
+    load();
+  }
+
+  function exportCSV() {
+    if (items.length === 0) return toast.error("No registrations to export");
+    const headers = [
+      "Submitted",
+      "Status",
+      "Read",
+      "Parent",
+      "Email",
+      "Phone",
+      "Relationship",
+      "Student",
+      "Date of Birth",
+      "Gender",
+      "Grade",
+      "Previous School",
+      "Address",
+      "Notes",
+    ];
+    const rows = items.map((r) => [
+      new Date(r.created_at).toISOString(),
+      r.status,
+      r.read ? "Yes" : "No",
+      r.parent_name,
+      r.parent_email,
+      r.parent_phone,
+      r.relationship,
+      `${r.student_first_name} ${r.student_last_name}`,
+      r.student_date_of_birth,
+      r.student_gender,
+      r.grade_applying_for,
+      r.previous_school ?? "",
+      r.address ?? "",
+      (r.notes ?? "").replace(/\s+/g, " "),
+    ]);
+    const escape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+    const csv = [headers, ...rows].map((row) => row.map(escape).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dinigaas-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${items.length} registration(s) to CSV`);
+  }
+
+  async function exportPDF() {
+    if (items.length === 0) return toast.error("No registrations to export");
+    const { default: jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    doc.setFontSize(16);
+    doc.text("Dinigaas Trading S.C. — Student Registrations", 40, 40);
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(
+      `Generated ${new Date().toLocaleString()} · ${items.length} record(s)`,
+      40,
+      58,
+    );
+    autoTable(doc, {
+      startY: 75,
+      head: [[
+        "Submitted",
+        "Parent",
+        "Contact",
+        "Student",
+        "DOB",
+        "Grade",
+        "Status",
+      ]],
+      body: items.map((r) => [
+        new Date(r.created_at).toLocaleDateString(),
+        r.parent_name,
+        `${r.parent_email}\n${r.parent_phone}`,
+        `${r.student_first_name} ${r.student_last_name}`,
+        r.student_date_of_birth,
+        r.grade_applying_for,
+        `${r.status}${r.read ? "" : " (new)"}`,
+      ]),
+      styles: { fontSize: 9, cellPadding: 4, valign: "top" },
+      headStyles: { fillColor: [30, 64, 47], textColor: 255 },
+      alternateRowStyles: { fillColor: [245, 243, 238] },
+      margin: { left: 40, right: 40 },
+    });
+    doc.save(`dinigaas-registrations-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success(`Exported ${items.length} registration(s) to PDF`);
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Toolbar */}
+      <Card>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by parent, student, email, phone, grade…"
+                className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+              className="rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="all">All ({items.length})</option>
+              <option value="unread">Unread ({unreadCount})</option>
+              <option value="read">Read</option>
+              <option value="pending">Status: Pending</option>
+              <option value="contacted">Status: Contacted</option>
+              <option value="accepted">Status: Accepted</option>
+              <option value="rejected">Status: Rejected</option>
+            </select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={exportCSV}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-accent"
+            >
+              <Download className="size-4" /> Export CSV
+            </button>
+            <button
+              onClick={exportPDF}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-light"
+            >
+              <Download className="size-4" /> Export PDF
+            </button>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Showing {pageItems.length} of {filtered.length} filtered · {items.length} total submissions
+        </p>
+      </Card>
+
+      {/* List */}
+      {pageItems.length === 0 ? (
+        <Card>
+          <p className="text-sm text-muted-foreground">
+            {items.length === 0
+              ? "No student registrations yet."
+              : "No registrations match your filters."}
+          </p>
+        </Card>
+      ) : (
+        <div className="grid gap-3">
+          {pageItems.map((r) => {
+            const open = expanded === r.id;
+            return (
+              <Card key={r.id}>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <button
+                    onClick={() => setExpanded(open ? null : r.id)}
+                    className="flex-1 text-left"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-serif text-lg text-primary">
+                        {r.student_first_name} {r.student_last_name}
+                      </h3>
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                        {r.grade_applying_for}
+                      </span>
+                      <StatusBadge status={r.status} />
+                      {!r.read && (
+                        <span className="rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-bold uppercase text-clay">
+                          New
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {r.relationship}: {r.parent_name} · {r.parent_email} · {r.parent_phone} ·{" "}
+                      {new Date(r.created_at).toLocaleString()}
+                    </p>
+                    {open && (
+                      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                        <Detail label="Date of birth" value={r.student_date_of_birth} />
+                        <Detail label="Gender" value={r.student_gender} />
+                        <Detail label="Previous school" value={r.previous_school || "—"} />
+                        <Detail label="Address" value={r.address || "—"} />
+                        {r.notes && (
+                          <div className="sm:col-span-2">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                              Notes
+                            </p>
+                            <p className="mt-1 whitespace-pre-line text-foreground">{r.notes}</p>
+                          </div>
+                        )}
+                      </dl>
+                    )}
+                  </button>
+                  <div className="flex flex-col gap-2 lg:w-56">
+                    <select
+                      value={r.status}
+                      onChange={(e) => setStatus(r, e.target.value)}
+                      disabled={busy}
+                      className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s.charAt(0).toUpperCase() + s.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setRead(r, !r.read)}
+                      disabled={busy}
+                      className="rounded-full border border-border px-3 py-1.5 text-xs hover:bg-accent"
+                    >
+                      {r.read ? "Mark unread" : "Mark read"}
+                    </button>
+                    <button
+                      onClick={() => remove(r.id)}
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-destructive/40 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="size-3.5" /> Delete
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            Page {safePage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-50"
+            >
+              <ChevronLeft className="size-3.5" /> Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-50"
+            >
+              Next <ChevronRight className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    pending: "bg-muted text-foreground/70",
+    contacted: "bg-primary/10 text-primary",
+    accepted: "bg-emerald-100 text-emerald-700",
+    rejected: "bg-destructive/10 text-destructive",
+  };
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+        map[status] ?? "bg-muted text-foreground/70"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 text-foreground">{value}</p>
+    </div>
+  );
+}

@@ -964,7 +964,7 @@ function RegistrationsAdmin() {
   const [statusFilter, setStatusFilter] = useState<"all" | "unread" | "read" | (typeof STATUS_OPTIONS)[number]>("all");
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -976,6 +976,8 @@ function RegistrationsAdmin() {
   useEffect(() => {
     load();
   }, []);
+
+  const selected = items.find((r) => r.id === selectedId) ?? null;
 
   const filtered = items.filter((r) => {
     if (statusFilter === "unread" && r.read) return false;

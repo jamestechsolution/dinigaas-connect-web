@@ -124,16 +124,24 @@ function ServicesPage() {
 
       <section className="py-16">
         <div className="mx-auto max-w-5xl rounded-3xl bg-primary p-10 text-center text-primary-foreground md:p-16">
-          <h2 className="font-serif text-4xl md:text-5xl">Ready to enroll or visit?</h2>
+          <h2 className="font-serif text-4xl md:text-5xl">Ready to enroll your child?</h2>
           <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-            Reach out to our admissions or clinic team. We'd love to welcome you.
+            Parents can register a student online in minutes. Our admissions team will handle the rest.
           </p>
-          <Link
-            to="/contact"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary-foreground px-7 py-3 text-sm font-semibold text-primary hover:bg-primary-foreground/90"
-          >
-            Contact us <ArrowRight className="size-4" />
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 rounded-full bg-primary-foreground px-7 py-3 text-sm font-semibold text-primary hover:bg-primary-foreground/90"
+            >
+              Register a student <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/40 px-7 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              Contact us
+            </Link>
+          </div>
         </div>
       </section>
     </SiteLayout>

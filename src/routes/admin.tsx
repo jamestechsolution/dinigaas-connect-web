@@ -94,6 +94,7 @@ function AdminPage() {
                 ["products", Package, "Products"],
                 ["news", Newspaper, "News"],
                 ["careers", Briefcase, "Careers"],
+                ["registrations", GraduationCap, "Registrations"],
                 ["messages", Inbox, "Messages"],
                 ["subscribers", Mail, "Subscribers"],
               ] as const).map(([key, Icon, label]) => (
@@ -117,6 +118,7 @@ function AdminPage() {
               {tab === "products" && <ProductsAdmin />}
               {tab === "news" && <NewsAdmin />}
               {tab === "careers" && <CareersAdmin />}
+              {tab === "registrations" && <RegistrationsAdmin />}
               {tab === "messages" && <MessagesAdmin />}
               {tab === "subscribers" && <SubscribersAdmin />}
             </div>
